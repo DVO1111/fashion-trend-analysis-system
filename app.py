@@ -1,6 +1,7 @@
 """Flask dashboard that ties the multimodal pipeline together."""
 
 import os
+import re
 import tempfile
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
@@ -14,6 +15,52 @@ app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 ENGAGEMENT_CSV = "dataset/engagement.csv"
+CNN_REPORT_PATH = "models/cnn_report.txt"
+CNN_LABELS_PATH = "models/cnn_labels.json"
+CNN_MODEL_PATH = "models/cnn_model.h5"
+
+
+def _read_cnn_accuracy():
+    """Parse the overall validation accuracy from the saved CNN report."""
+    if not os.path.exists(CNN_REPORT_PATH):
+        return None
+    with open(CNN_REPORT_PATH) as f:
+        text = f.read()
+    match = re.search(r"Overall validation accuracy:\s*([\d.]+)%", text)
+    return float(match.group(1)) if match else None
+
+
+def _stats():
+    """All numbers shown on the dashboard. Every value is computed from
+    actual project files, not invented for display."""
+    out = {
+        "engagement_records": 0,
+        "unique_trends": 0,
+        "total_likes": 0,
+        "total_comments": 0,
+        "total_shares": 0,
+        "cnn_accuracy_pct": _read_cnn_accuracy(),
+        "cnn_trained": os.path.exists(CNN_MODEL_PATH),
+        "cnn_classes": [],
+        "hashtags_tracked": 0,
+        "captions_tracked": 0,
+    }
+    if os.path.exists(ENGAGEMENT_CSV):
+        df = pd.read_csv(ENGAGEMENT_CSV)
+        out["engagement_records"] = int(len(df))
+        out["unique_trends"] = int(df["trend"].nunique())
+        out["total_likes"] = int(df["likes"].sum())
+        out["total_comments"] = int(df["comments"].sum())
+        out["total_shares"] = int(df["shares"].sum())
+    if os.path.exists(CNN_LABELS_PATH):
+        import json
+        with open(CNN_LABELS_PATH) as f:
+            out["cnn_classes"] = json.load(f)
+    if os.path.exists("dataset/hashtags.csv"):
+        out["hashtags_tracked"] = int(len(pd.read_csv("dataset/hashtags.csv")))
+    if os.path.exists("dataset/captions.csv"):
+        out["captions_tracked"] = int(len(pd.read_csv("dataset/captions.csv")))
+    return out
 
 # Warm the BERT pipeline at import time. With gunicorn --preload this happens
 # once in the master process before workers fork, so each worker inherits the
@@ -37,7 +84,16 @@ def _engagement_summary():
 
 @app.route("/")
 def home():
-    return render_template("index.html", trends=_engagement_summary())
+    return render_template(
+        "index.html",
+        trends=_engagement_summary(),
+        stats=_stats(),
+    )
+
+
+@app.route("/api/stats", methods=["GET"])
+def api_stats():
+    return jsonify(_stats())
 
 
 @app.route("/api/analyse-text", methods=["POST"])

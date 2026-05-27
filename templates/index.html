@@ -2,138 +2,307 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Social Media Fashion Trend Analysis System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Intelligence Platform — Phase 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-               margin: 0; background: #0f1115; color: #e8eaed; }
-        header { padding: 28px 40px; background: linear-gradient(135deg, #6a11cb, #2575fc); }
-        h1 { margin: 0; font-size: 28px; }
-        .sub { opacity: 0.85; margin-top: 6px; }
-        main { padding: 32px 40px; display: grid; gap: 24px;
-               grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-        section { background: #181b22; border-radius: 12px; padding: 20px;
-                  box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
-        section h2 { margin-top: 0; font-size: 18px; border-bottom: 1px solid #2a2f3a;
-                     padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #2a2f3a; }
-        th { color: #9aa0a6; font-weight: 500; }
-        textarea, input[type=file] { width: 100%; box-sizing: border-box;
-                                     background: #0f1115; color: #e8eaed;
-                                     border: 1px solid #2a2f3a; border-radius: 6px;
-                                     padding: 10px; font-family: inherit; }
-        textarea { min-height: 80px; resize: vertical; }
-        button { margin-top: 10px; background: #2575fc; color: white; border: none;
-                 padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        button:hover { background: #1a5fd0; }
-        pre { background: #0f1115; padding: 10px; border-radius: 6px; overflow-x: auto;
-              font-size: 13px; }
+        body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        .card { background: #0f0f12; border: 1px solid #27272a; border-radius: 1.5rem; }
+        .inset { background: #000; border: 1px solid #27272a; border-radius: 1rem; }
+        .badge-real { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .badge-mock { background: rgba(234,179,8,0.12); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+        pre { white-space: pre-wrap; word-break: break-word; }
     </style>
 </head>
-<body>
-    <header>
-        <h1>Social Media Fashion Trend Analysis System</h1>
-        <div class="sub">Multimodal ML dashboard — Lagos university student fashion</div>
+<body class="min-h-screen bg-black text-white p-6">
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <header class="flex items-start justify-between flex-wrap gap-4">
+        <div>
+            <h1 class="text-4xl font-bold">Fashion Intelligence Platform</h1>
+            <p class="text-zinc-400 mt-2">
+                Multimodal ML pipeline for Lagos youth fashion trend analysis
+                — <span class="text-zinc-300">Phase 1: architecture validation</span>
+            </p>
+        </div>
+        <div class="flex gap-2 text-xs">
+            <span class="badge-real px-3 py-1 rounded-full">All metrics computed from project files</span>
+        </div>
     </header>
 
-    <main>
-        <section>
-            <h2>Engagement by Trend</h2>
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-5">
+            <p class="text-zinc-400 text-sm">Engagement records</p>
+            <h2 class="text-3xl font-bold mt-2">{{ stats.engagement_records }}</h2>
+            <p class="text-zinc-500 text-xs mt-1">from <code>engagement.csv</code></p>
+        </div>
+        <div class="card p-5">
+            <p class="text-zinc-400 text-sm">Trends tracked</p>
+            <h2 class="text-3xl font-bold mt-2">{{ stats.unique_trends }}</h2>
+            <p class="text-zinc-500 text-xs mt-1">unique <code>trend</code> values</p>
+        </div>
+        <div class="card p-5">
+            <p class="text-zinc-400 text-sm">Hashtags + captions</p>
+            <h2 class="text-3xl font-bold mt-2">{{ stats.hashtags_tracked + stats.captions_tracked }}</h2>
+            <p class="text-zinc-500 text-xs mt-1">{{ stats.hashtags_tracked }} tags + {{ stats.captions_tracked }} captions</p>
+        </div>
+        <div class="card p-5">
+            <p class="text-zinc-400 text-sm">CNN val accuracy</p>
+            <h2 class="text-3xl font-bold mt-2 {% if stats.cnn_accuracy_pct %}text-green-400{% else %}text-zinc-500{% endif %}">
+                {% if stats.cnn_accuracy_pct %}{{ "%.1f"|format(stats.cnn_accuracy_pct) }}%{% else %}—{% endif %}
+            </h2>
+            <p class="text-zinc-500 text-xs mt-1">from <code>cnn_report.txt</code></p>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="card p-6 lg:col-span-2">
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-semibold">Engagement by Trend</h2>
+                    <p class="text-zinc-400 text-sm mt-1">
+                        Aggregated likes / comments / shares per trend category — {{ stats.engagement_records }} records
+                    </p>
+                </div>
+                <span class="badge-real px-3 py-1 rounded-full text-xs">Real</span>
+            </div>
+
             {% if trends %}
-            <table>
-                <thead>
-                    <tr><th>Trend</th><th>Likes</th><th>Comments</th><th>Shares</th></tr>
-                </thead>
-                <tbody>
-                {% for row in trends %}
-                    <tr>
-                        <td>{{ row.trend }}</td>
-                        <td>{{ row.likes }}</td>
-                        <td>{{ row.comments }}</td>
-                        <td>{{ row.shares }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <canvas id="engagementChart" height="180"></canvas>
+            <details class="mt-4">
+                <summary class="text-sm text-zinc-400 cursor-pointer hover:text-zinc-200">Show raw table</summary>
+                <table class="w-full mt-3 text-sm">
+                    <thead>
+                        <tr class="text-zinc-500 border-b border-zinc-800">
+                            <th class="text-left py-2">Trend</th>
+                            <th class="text-right py-2">Likes</th>
+                            <th class="text-right py-2">Comments</th>
+                            <th class="text-right py-2">Shares</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in trends %}
+                        <tr class="border-b border-zinc-900">
+                            <td class="py-2">{{ row.trend }}</td>
+                            <td class="text-right">{{ row.likes }}</td>
+                            <td class="text-right">{{ row.comments }}</td>
+                            <td class="text-right">{{ row.shares }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </details>
+            <script>
+                const trendData = {{ trends | tojson }};
+                new Chart(document.getElementById('engagementChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: trendData.map(r => r.trend),
+                        datasets: [
+                            {label: 'Likes',    data: trendData.map(r => r.likes),    backgroundColor: '#4ade80'},
+                            {label: 'Comments', data: trendData.map(r => r.comments), backgroundColor: '#60a5fa'},
+                            {label: 'Shares',   data: trendData.map(r => r.shares),   backgroundColor: '#c084fc'},
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {legend: {labels: {color: '#d4d4d8'}}},
+                        scales: {
+                            x: {ticks: {color: '#a1a1aa'}, grid: {color: '#27272a'}},
+                            y: {ticks: {color: '#a1a1aa'}, grid: {color: '#27272a'}},
+                        },
+                    },
+                });
+            </script>
             {% else %}
-            <p>No engagement data found. Populate <code>dataset/engagement.csv</code>.</p>
+            <p class="text-zinc-400">No engagement data found. Populate <code>dataset/engagement.csv</code>.</p>
             {% endif %}
-        </section>
+        </div>
 
-        <section>
-            <h2>Caption Sentiment + Trend Tag</h2>
-            <textarea id="caption" placeholder="Paste a caption or comment..."></textarea>
-            <button onclick="analyseText()">Analyse</button>
-            <pre id="text-result"></pre>
-        </section>
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <h2 class="text-2xl font-semibold">CNN Model Card</h2>
+                <span class="{% if stats.cnn_trained %}badge-real{% else %}badge-mock{% endif %} px-3 py-1 rounded-full text-xs">
+                    {% if stats.cnn_trained %}Trained{% else %}Untrained{% endif %}
+                </span>
+            </div>
 
-        <section>
-            <h2>Image Style Classifier</h2>
-            <input type="file" id="image" accept="image/*">
-            <button onclick="analyseImage()">Classify Image</button>
-            <pre id="image-result"></pre>
-        </section>
+            {% if stats.cnn_trained %}
+            <div class="inset p-4 space-y-3">
+                <div>
+                    <p class="text-zinc-400 text-xs uppercase tracking-wide">Architecture</p>
+                    <p class="font-medium">MobileNetV2 + transfer learning</p>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-xs uppercase tracking-wide">Validation accuracy</p>
+                    <p class="text-green-400 font-bold text-2xl">
+                        {% if stats.cnn_accuracy_pct %}{{ "%.2f"|format(stats.cnn_accuracy_pct) }}%{% else %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-xs uppercase tracking-wide">Classes</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        {% for c in stats.cnn_classes %}
+                        <span class="bg-zinc-800 px-2 py-0.5 rounded text-xs">{{ c }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <p class="text-zinc-400 text-xs uppercase tracking-wide">Training data</p>
+                    <p class="text-sm">ashraq/fashion-product-images-small (public)</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-zinc-400 text-sm">Run <code>python train_image_model.py</code> to populate.</p>
+            {% endif %}
 
-        <section>
-            <h2>Trend Forecast</h2>
-            <textarea id="series" placeholder="Comma-separated engagement series, e.g. 100,120,140,165,200"></textarea>
-            <button onclick="runForecast()">Forecast</button>
-            <pre id="forecast-result"></pre>
-        </section>
-    </main>
+            <div class="inset p-4 mt-4">
+                <p class="text-zinc-400 text-xs uppercase tracking-wide">Phase 2 work</p>
+                <p class="text-sm mt-1 text-zinc-300">
+                    Lagos-collected social media data → fine-tune on local fashion;
+                    add Alté category (no public-dataset equivalent).
+                </p>
+            </div>
+        </div>
+    </section>
 
-    <script>
-        async function runWithStatus(resultEl, fn) {
-            resultEl.textContent = "Working… (first call can take a few seconds)";
-            try {
-                const data = await fn();
-                resultEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                resultEl.textContent = "Error: " + (err.message || err);
-            }
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-semibold">Caption Sentiment + Trend Tag</h2>
+                    <p class="text-zinc-400 text-sm mt-1">distilBERT (SST-2) + keyword rules</p>
+                </div>
+                <span class="badge-real px-3 py-1 rounded-full text-xs">Live BERT</span>
+            </div>
+            <textarea id="caption" rows="3"
+                placeholder="e.g. Loving this Ankara combo on campus"
+                class="inset w-full px-4 py-3 outline-none text-sm focus:border-zinc-600"></textarea>
+            <button onclick="analyseText()" class="mt-3 bg-white text-black px-5 py-2 rounded-xl font-medium hover:bg-zinc-200">
+                Analyse
+            </button>
+            <pre id="text-result" class="inset p-3 mt-3 text-sm text-zinc-300 min-h-[64px]"></pre>
+        </div>
+
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-semibold">Image Style Classifier</h2>
+                    <p class="text-zinc-400 text-sm mt-1">
+                        {% if stats.cnn_trained %}MobileNetV2, {{ stats.cnn_classes|length }} classes{% else %}Untrained skeleton{% endif %}
+                    </p>
+                </div>
+                <span class="{% if stats.cnn_trained %}badge-real{% else %}badge-mock{% endif %} px-3 py-1 rounded-full text-xs">
+                    {% if stats.cnn_trained %}Real predictions{% else %}Random{% endif %}
+                </span>
+            </div>
+            <input type="file" id="image" accept="image/*"
+                class="inset w-full px-3 py-2 text-sm file:mr-3 file:bg-zinc-800 file:border-0 file:text-white file:px-3 file:py-1 file:rounded-md"/>
+            <button onclick="analyseImage()" class="mt-3 bg-white text-black px-5 py-2 rounded-xl font-medium hover:bg-zinc-200">
+                Classify
+            </button>
+            <pre id="image-result" class="inset p-3 mt-3 text-sm text-zinc-300 min-h-[64px]"></pre>
+        </div>
+
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-semibold">Trend Direction</h2>
+                    <p class="text-zinc-400 text-sm mt-1">Slope-based detection (LSTM scaffold present, untrained)</p>
+                </div>
+                <span class="badge-mock px-3 py-1 rounded-full text-xs">Slope, not LSTM</span>
+            </div>
+            <textarea id="series" rows="2"
+                placeholder="100, 130, 170, 220, 280"
+                class="inset w-full px-4 py-3 outline-none text-sm focus:border-zinc-600"></textarea>
+            <button onclick="runForecast()" class="mt-3 bg-white text-black px-5 py-2 rounded-xl font-medium hover:bg-zinc-200">
+                Detect direction
+            </button>
+            <pre id="forecast-result" class="inset p-3 mt-3 text-sm text-zinc-300 min-h-[64px]"></pre>
+        </div>
+
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-semibold">KMeans Cluster Inspector</h2>
+                    <p class="text-zinc-400 text-sm mt-1">Clusters {{ stats.engagement_records }} records on standardised likes / comments / shares</p>
+                </div>
+                <span class="badge-real px-3 py-1 rounded-full text-xs">Real sklearn fit</span>
+            </div>
+            <button onclick="runCluster()" class="bg-white text-black px-5 py-2 rounded-xl font-medium hover:bg-zinc-200">
+                Re-fit clusters
+            </button>
+            <pre id="cluster-result" class="inset p-3 mt-3 text-xs text-zinc-300 min-h-[64px] max-h-64 overflow-auto"></pre>
+        </div>
+    </section>
+
+    <footer class="card p-6">
+        <h2 class="text-lg font-semibold mb-2">Methodology and honest limitations</h2>
+        <ul class="text-zinc-400 text-sm space-y-1 list-disc list-inside">
+            <li>Engagement data is a hand-seeded dataset ({{ stats.engagement_records }} rows) used to validate the aggregation + clustering pipeline.</li>
+            <li>BERT sentiment uses distilbert-sst-2 — pre-trained on movie reviews; not fine-tuned on fashion captions.</li>
+            <li>CNN trained on public product photos; deployed accuracy on real social-media imagery is expected to be lower without domain fine-tuning.</li>
+            <li>Trend "forecast" endpoint uses linear slope detection; the LSTM training code exists for Phase 2 once time-series data is collected.</li>
+            <li>Phase 2 scope: Lagos-collected social media data, alté category, real engagement time series, fine-tuned CNN.</li>
+        </ul>
+    </footer>
+</div>
+
+<script>
+    async function call(resultEl, fn) {
+        resultEl.textContent = "Working...";
+        try {
+            const r = await fn();
+            resultEl.textContent = JSON.stringify(r, null, 2);
+        } catch (err) {
+            resultEl.textContent = "Error: " + (err.message || err);
         }
+    }
 
-        function analyseText() {
-            const text = document.getElementById("caption").value;
-            const out = document.getElementById("text-result");
-            runWithStatus(out, async () => {
-                const res = await fetch("/api/analyse-text", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({text})
-                });
-                return res.json();
+    function analyseText() {
+        const t = document.getElementById("caption").value;
+        call(document.getElementById("text-result"), async () => {
+            const r = await fetch("/api/analyse-text", {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({text: t})
             });
-        }
+            return r.json();
+        });
+    }
 
-        function analyseImage() {
-            const fileInput = document.getElementById("image");
-            const out = document.getElementById("image-result");
-            if (!fileInput.files.length) {
-                out.textContent = "Pick an image first.";
-                return;
-            }
-            const form = new FormData();
-            form.append("image", fileInput.files[0]);
-            runWithStatus(out, async () => {
-                const res = await fetch("/api/analyse-image", {method: "POST", body: form});
-                return res.json();
-            });
-        }
+    function analyseImage() {
+        const f = document.getElementById("image");
+        const out = document.getElementById("image-result");
+        if (!f.files.length) { out.textContent = "Pick an image first."; return; }
+        const fd = new FormData();
+        fd.append("image", f.files[0]);
+        call(out, async () => {
+            const r = await fetch("/api/analyse-image", {method: "POST", body: fd});
+            return r.json();
+        });
+    }
 
-        function runForecast() {
-            const series = document.getElementById("series").value
-                .split(",").map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-            const out = document.getElementById("forecast-result");
-            runWithStatus(out, async () => {
-                const res = await fetch("/api/forecast", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({series})
-                });
-                return res.json();
+    function runForecast() {
+        const s = document.getElementById("series").value
+            .split(",").map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
+        call(document.getElementById("forecast-result"), async () => {
+            const r = await fetch("/api/forecast", {
+                method: "POST", headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({series: s})
             });
-        }
-    </script>
+            return r.json();
+        });
+    }
+
+    function runCluster() {
+        call(document.getElementById("cluster-result"), async () => {
+            const r = await fetch("/api/cluster");
+            return r.json();
+        });
+    }
+</script>
 </body>
 </html>
