@@ -6,9 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PORT=7860 \
     FLASK_DEBUG=0 \
-    HF_HOME=/tmp/hf-cache \
-    TRANSFORMERS_CACHE=/tmp/hf-cache \
-    TF_CPP_MIN_LOG_LEVEL=2
+    HF_HOME=/app/hf-cache \
+    TRANSFORMERS_CACHE=/app/hf-cache \
+    TF_CPP_MIN_LOG_LEVEL=2 \
+    SENTIMENT_MODEL=distilbert/distilbert-base-uncased-finetuned-sst-2-english
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 libglib2.0-0 \
@@ -19,9 +20,10 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-COPY . .
+RUN mkdir -p /app/hf-cache static/uploads models \
+    && python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='${SENTIMENT_MODEL}')"
 
-RUN mkdir -p /tmp/hf-cache static/uploads models
+COPY . .
 
 EXPOSE 7860
 

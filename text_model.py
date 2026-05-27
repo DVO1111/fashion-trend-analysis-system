@@ -5,8 +5,14 @@ fine-tuned on SST-2 — good enough for positive/negative classification of
 short fashion captions. Trend category is rule-matched from a keyword map.
 """
 
+import os
 from functools import lru_cache
 from typing import Dict
+
+SENTIMENT_MODEL = os.environ.get(
+    "SENTIMENT_MODEL",
+    "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+)
 
 TREND_KEYWORDS = {
     "ankara_fusion": ["ankara", "owambe", "senator", "agbada", "aso ebi"],
@@ -20,7 +26,7 @@ TREND_KEYWORDS = {
 @lru_cache(maxsize=1)
 def get_classifier():
     from transformers import pipeline
-    return pipeline("sentiment-analysis")
+    return pipeline("sentiment-analysis", model=SENTIMENT_MODEL)
 
 
 def analyse_sentiment(text: str) -> Dict:

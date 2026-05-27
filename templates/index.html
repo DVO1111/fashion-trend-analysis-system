@@ -83,37 +83,56 @@
     </main>
 
     <script>
-        async function analyseText() {
-            const text = document.getElementById("caption").value;
-            const res = await fetch("/api/analyse-text", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({text})
-            });
-            document.getElementById("text-result").textContent =
-                JSON.stringify(await res.json(), null, 2);
+        async function runWithStatus(resultEl, fn) {
+            resultEl.textContent = "Working… (first call can take a few seconds)";
+            try {
+                const data = await fn();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultEl.textContent = "Error: " + (err.message || err);
+            }
         }
 
-        async function analyseImage() {
+        function analyseText() {
+            const text = document.getElementById("caption").value;
+            const out = document.getElementById("text-result");
+            runWithStatus(out, async () => {
+                const res = await fetch("/api/analyse-text", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({text})
+                });
+                return res.json();
+            });
+        }
+
+        function analyseImage() {
             const fileInput = document.getElementById("image");
-            if (!fileInput.files.length) { return; }
+            const out = document.getElementById("image-result");
+            if (!fileInput.files.length) {
+                out.textContent = "Pick an image first.";
+                return;
+            }
             const form = new FormData();
             form.append("image", fileInput.files[0]);
-            const res = await fetch("/api/analyse-image", {method: "POST", body: form});
-            document.getElementById("image-result").textContent =
-                JSON.stringify(await res.json(), null, 2);
+            runWithStatus(out, async () => {
+                const res = await fetch("/api/analyse-image", {method: "POST", body: form});
+                return res.json();
+            });
         }
 
-        async function runForecast() {
+        function runForecast() {
             const series = document.getElementById("series").value
                 .split(",").map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-            const res = await fetch("/api/forecast", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({series})
+            const out = document.getElementById("forecast-result");
+            runWithStatus(out, async () => {
+                const res = await fetch("/api/forecast", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({series})
+                });
+                return res.json();
             });
-            document.getElementById("forecast-result").textContent =
-                JSON.stringify(await res.json(), null, 2);
         }
     </script>
 </body>
