@@ -15,6 +15,12 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 ENGAGEMENT_CSV = "dataset/engagement.csv"
 
+# Warm the BERT pipeline at import time. With gunicorn --preload this happens
+# once in the master process before workers fork, so each worker inherits the
+# loaded model via copy-on-write and the first user request is instant.
+if os.environ.get("WARMUP_BERT", "1") == "1":
+    text_model.get_classifier()
+
 
 def _engagement_summary():
     if not os.path.exists(ENGAGEMENT_CSV):
