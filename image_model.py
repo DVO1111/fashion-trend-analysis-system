@@ -8,14 +8,23 @@ Builds a small CNN (the architecture from the project spec) and exposes:
 Run directly to build and save an untrained model skeleton.
 """
 
+import json
 import os
 import numpy as np
 from keras.models import Sequential, load_model as keras_load_model
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 
 MODEL_PATH = "models/cnn_model.h5"
+LABELS_PATH = "models/cnn_labels.json"
 IMG_SIZE = (224, 224)
 DEFAULT_LABELS = ["ankara_fusion", "streetwear", "casual", "alte", "corporate_chic"]
+
+
+def load_labels(path: str = LABELS_PATH):
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f)
+    return DEFAULT_LABELS
 
 
 def build_model(num_classes: int = 5) -> Sequential:

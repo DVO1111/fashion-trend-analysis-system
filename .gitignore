@@ -5,9 +5,13 @@ __pycache__/
 venv/
 env/
 
-# Trained model artefacts (regenerate via the training scripts)
-models/*.h5
-models/*.pkl
+# Downloaded training images (regenerate via `python download_dataset.py`)
+dataset/images/*/
+!dataset/images/README.md
+
+# HuggingFace cache (created locally when testing transformers)
+hf-cache/
+.cache/
 
 # Runtime uploads
 static/uploads/

@@ -54,7 +54,7 @@ def api_analyse_image():
     if "image" not in request.files:
         return jsonify({"error": "image file is required"}), 400
 
-    from image_model import predict_style, load, build_model, DEFAULT_LABELS, MODEL_PATH
+    from image_model import predict_style, load, build_model, load_labels, MODEL_PATH
 
     file = request.files["image"]
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1] or ".jpg") as tmp:
@@ -62,8 +62,15 @@ def api_analyse_image():
         tmp_path = tmp.name
 
     try:
-        model = load(MODEL_PATH) if os.path.exists(MODEL_PATH) else build_model(len(DEFAULT_LABELS))
-        result = predict_style(model, tmp_path, DEFAULT_LABELS)
+        labels = load_labels()
+        if os.path.exists(MODEL_PATH):
+            model = load(MODEL_PATH)
+            trained = True
+        else:
+            model = build_model(len(labels))
+            trained = False
+        result = predict_style(model, tmp_path, labels)
+        result["trained"] = trained
         return jsonify(result)
     finally:
         try:

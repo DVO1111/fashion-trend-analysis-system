@@ -1,0 +1,21 @@
+Overall validation accuracy: 82.833%
+
+Per-class precision / recall / F1:
+                precision    recall  f1-score   support
+
+ ankara_fusion      0.905     0.966     0.935       267
+        casual      0.724     0.666     0.693       311
+corporate_chic      0.875     0.886     0.881       308
+    streetwear      0.808     0.815     0.811       314
+
+      accuracy                          0.828      1200
+     macro avg      0.828     0.833     0.830      1200
+  weighted avg      0.825     0.828     0.826      1200
+
+
+Confusion matrix (rows = true, cols = predicted):
+labels: ankara_fusion, casual, corporate_chic, streetwear
+[[258   8   1   0]
+ [ 24 207  25  55]
+ [  3  26 273   6]
+ [  0  45  13 256]]

@@ -47,13 +47,30 @@ Then open http://127.0.0.1:5000
 ## Train / build models individually
 
 ```
-python scraper.py       # builds dataset/fashion_posts.csv
-python preprocess.py    # resizes dataset/images/*
-python image_model.py   # saves models/cnn_model.h5  (untrained skeleton)
-python clustering.py    # saves models/clustering_model.pkl
-python forecast.py      # saves models/lstm_model.h5
-python text_model.py    # runs three example captions
+python scraper.py            # builds dataset/fashion_posts.csv
+python preprocess.py         # resizes dataset/images/*
+python image_model.py        # saves models/cnn_model.h5  (untrained skeleton)
+python clustering.py         # saves models/clustering_model.pkl
+python forecast.py           # saves models/lstm_model.h5
+python text_model.py         # runs three example captions
 ```
+
+## Train the fashion CNN on real images
+
+To replace the untrained CNN skeleton with a model that actually predicts
+fashion categories, see [`dataset/images/README.md`](dataset/images/README.md)
+for the expected folder layout, then run:
+
+```
+python train_image_model.py              # transfer learning (MobileNetV2) — recommended
+python train_image_model.py --simple-cnn # plain CNN from the original spec
+```
+
+Outputs `models/cnn_model.h5`, `models/cnn_labels.json`, and `models/cnn_report.txt`
+(accuracy, per-class precision/recall, confusion matrix — drop into your thesis).
+The dashboard auto-detects the trained model and labels on next start.
+
+> Training on CPU is slow; use Google Colab with a free T4 GPU if available.
 
 ## API endpoints
 
