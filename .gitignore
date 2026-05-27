@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Trained model artefacts (regenerate via the training scripts)
+models/*.h5
+models/*.pkl
+
+# Runtime uploads
+static/uploads/
+
+# Editor / OS
+.vscode/*.log
+.DS_Store
+Thumbs.db

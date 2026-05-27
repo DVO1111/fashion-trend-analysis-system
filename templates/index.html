@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social Media Fashion Trend Analysis System</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+               margin: 0; background: #0f1115; color: #e8eaed; }
+        header { padding: 28px 40px; background: linear-gradient(135deg, #6a11cb, #2575fc); }
+        h1 { margin: 0; font-size: 28px; }
+        .sub { opacity: 0.85; margin-top: 6px; }
+        main { padding: 32px 40px; display: grid; gap: 24px;
+               grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        section { background: #181b22; border-radius: 12px; padding: 20px;
+                  box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+        section h2 { margin-top: 0; font-size: 18px; border-bottom: 1px solid #2a2f3a;
+                     padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #2a2f3a; }
+        th { color: #9aa0a6; font-weight: 500; }
+        textarea, input[type=file] { width: 100%; box-sizing: border-box;
+                                     background: #0f1115; color: #e8eaed;
+                                     border: 1px solid #2a2f3a; border-radius: 6px;
+                                     padding: 10px; font-family: inherit; }
+        textarea { min-height: 80px; resize: vertical; }
+        button { margin-top: 10px; background: #2575fc; color: white; border: none;
+                 padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #1a5fd0; }
+        pre { background: #0f1115; padding: 10px; border-radius: 6px; overflow-x: auto;
+              font-size: 13px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Social Media Fashion Trend Analysis System</h1>
+        <div class="sub">Multimodal ML dashboard — Lagos university student fashion</div>
+    </header>
+
+    <main>
+        <section>
+            <h2>Engagement by Trend</h2>
+            {% if trends %}
+            <table>
+                <thead>
+                    <tr><th>Trend</th><th>Likes</th><th>Comments</th><th>Shares</th></tr>
+                </thead>
+                <tbody>
+                {% for row in trends %}
+                    <tr>
+                        <td>{{ row.trend }}</td>
+                        <td>{{ row.likes }}</td>
+                        <td>{{ row.comments }}</td>
+                        <td>{{ row.shares }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No engagement data found. Populate <code>dataset/engagement.csv</code>.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Caption Sentiment + Trend Tag</h2>
+            <textarea id="caption" placeholder="Paste a caption or comment..."></textarea>
+            <button onclick="analyseText()">Analyse</button>
+            <pre id="text-result"></pre>
+        </section>
+
+        <section>
+            <h2>Image Style Classifier</h2>
+            <input type="file" id="image" accept="image/*">
+            <button onclick="analyseImage()">Classify Image</button>
+            <pre id="image-result"></pre>
+        </section>
+
+        <section>
+            <h2>Trend Forecast</h2>
+            <textarea id="series" placeholder="Comma-separated engagement series, e.g. 100,120,140,165,200"></textarea>
+            <button onclick="runForecast()">Forecast</button>
+            <pre id="forecast-result"></pre>
+        </section>
+    </main>
+
+    <script>
+        async function analyseText() {
+            const text = document.getElementById("caption").value;
+            const res = await fetch("/api/analyse-text", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({text})
+            });
+            document.getElementById("text-result").textContent =
+                JSON.stringify(await res.json(), null, 2);
+        }
+
+        async function analyseImage() {
+            const fileInput = document.getElementById("image");
+            if (!fileInput.files.length) { return; }
+            const form = new FormData();
+            form.append("image", fileInput.files[0]);
+            const res = await fetch("/api/analyse-image", {method: "POST", body: form});
+            document.getElementById("image-result").textContent =
+                JSON.stringify(await res.json(), null, 2);
+        }
+
+        async function runForecast() {
+            const series = document.getElementById("series").value
+                .split(",").map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+            const res = await fetch("/api/forecast", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({series})
+            });
+            document.getElementById("forecast-result").textContent =
+                JSON.stringify(await res.json(), null, 2);
+        }
+    </script>
+</body>
+</html>

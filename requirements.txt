@@ -1,0 +1,13 @@
+flask
+pandas
+numpy
+scikit-learn
+tensorflow
+torch
+transformers
+opencv-python
+matplotlib
+seaborn
+selenium
+beautifulsoup4
+joblib
