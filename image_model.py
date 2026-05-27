@@ -53,8 +53,12 @@ def predict_style(model, image_path: str, labels=None):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Could not read image: {image_path}")
+    # cv2.imread returns BGR; convert to RGB to match training (Keras image_dataset_from_directory)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = cv2.resize(image, IMG_SIZE)
-    x = np.expand_dims(image.astype("float32") / 255.0, axis=0)
+    # Pass raw [0, 255] floats — the model's first layer (Lambda + preprocess_input)
+    # handles MobileNetV2's [0, 255] -> [-1, 1] mapping internally.
+    x = np.expand_dims(image.astype("float32"), axis=0)
     probs = model.predict(x, verbose=0)[0]
     idx = int(np.argmax(probs))
     return {"label": labels[idx], "confidence": float(probs[idx])}
@@ -66,7 +70,16 @@ def save(model, path: str = MODEL_PATH) -> None:
 
 
 def load(path: str = MODEL_PATH):
-    return keras_load_model(path)
+    # The trained transfer-learning model has a Lambda(preprocess_input) layer.
+    # Keras 3 needs both safe_mode=False and an explicit custom_objects entry
+    # for the Lambda's wrapped function, since the saved config records
+    # `preprocess_input` without its module path.
+    from keras.applications.mobilenet_v2 import preprocess_input
+    return keras_load_model(
+        path,
+        custom_objects={"preprocess_input": preprocess_input},
+        safe_mode=False,
+    )
 
 
 if __name__ == "__main__":
